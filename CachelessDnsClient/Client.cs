@@ -48,30 +48,32 @@ namespace CachelessDnsClient
 
                 if (soaMessage != null && soaMessage.ReturnCode == ReturnCode.NoError && soaMessage.AuthorityRecords.Count > 0)
                 {
-
+                    bool foundInReplicas = true;
                     foreach (NsRecord server in soaMessage.AuthorityRecords)
                     {
                         // Create client talking directly to Master server
-                        // NOTE: Async client appears not to work
                         hostDomainIps = await resolver.ResolveHostAsync(server.NameServer);
                         ip4s = hostDomainIps.Where(x => x.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
                         client = new DnsClient(ip4s, 60);
+
+                        // NOTE: Async client.Resolve appears not to work, so using sync method
                         var dnsMessage = client.Resolve(hostName, RecordType.A, RecordClass.INet, new DnsQueryOptions() { IsRecursionDesired = true });
                         if (dnsMessage == null || dnsMessage.ReturnCode == ReturnCode.NxDomain || dnsMessage.AnswerRecords.Count == 0)
                         {
                             // Record not found
-                            return false;
+                            Console.WriteLine("Record not found in NS server '{0}'", server.NameServer);
+                            foundInReplicas = false;
                         }
 
                         // If we aren't checking all replica's, return true from first result
                         if (!replicas)
                         {
-                            return true;
+                            return foundInReplicas;
                         }
                     }
 
                     // All SOA servers returned a record
-                    return true;
+                    return foundInReplicas;
                 }
             }
 
