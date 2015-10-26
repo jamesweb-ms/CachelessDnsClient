@@ -60,7 +60,10 @@ namespace CDC
 
         static void Help()
         {
-
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  cdc host          # Looks up host name");
+            Console.WriteLine("  cdc /exists host  # Looks up host name");
+            Console.WriteLine("  cdc /replica host # Looks up host name on all SOA Name servers");
         }
     }
 }
