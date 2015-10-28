@@ -66,12 +66,7 @@ namespace CachelessDnsClient
             {
                 // Some local servers provide truncated SOA list, so query authority
                 var hostDomainIps = await localResolver.ResolveAsync(soaRecords.RecordsSOA[0].MNAME);
-                var remoteResolver = new Resolver(GetIpV4Address(hostDomainIps))
-                {
-                    Recursion = true,
-                    TimeOut = 20,
-                    TransportType =  Heijden.DNS.TransportType.Tcp
-                };
+                var remoteResolver = new Resolver(GetIpV4Address(hostDomainIps));
 
                 var soaMessage = remoteResolver.Query(hostDomain.Name, QType.SOA);
 
